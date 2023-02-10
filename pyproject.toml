@@ -1,0 +1,37 @@
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "atinary_sdlabs_wrapper"
+version = "0.1.0"
+description = "My package description"
+readme = "README.md"
+requires-python = ">=3.7"
+keywords = ["ML", "SDLabs","Battery electrolytes"]
+# classifiers = [
+#     "Framework :: Django",
+#     "Programming Language :: Python :: 3",
+# ]
+dependencies = [
+    "pyyaml",
+    "scientia_sdk==0.19.1",
+    "nexus_sdk@git+https://github.com/Atinary-technologies/nexus_sdk@v0.14.0",
+    "pre-commit",
+    "dataclasses-jsonschema",
+]
+
+[tool.setuptools.packages.find]
+# All the following settings are optional:
+where = ["src"]  # ["."] by default
+# include = ["mypackage*"]  # ["*"] by default
+exclude = ["tests,sdlabs_sdks_*"]  # empty by default
+# namespaces = false  # true by default
+
+
+# [project.optional-dependencies]
+# pdf = ["ReportLab>=1.2", "RXP"]
+# rest = ["docutils>=0.3", "pack ==1.1, ==1.3"]
+
+[project.scripts]
+generate_sdlabs_schema = "sdlabs_wrapper.models:generate_and_write_schema"

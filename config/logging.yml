@@ -1,0 +1,19 @@
+version: 1
+formatters:
+  generic:
+    format: "[%(processName)s - %(asctime)s] {%(pathname)s:%(lineno)d} %(levelname)s - %(message).16000s"
+handlers:
+  console:
+    class: logging.StreamHandler
+    level: NOTSET
+    formatter: generic
+    stream: ext://sys.stdout
+loggers:
+  # general loggers verbosity
+  atinary_wrapper:
+    level: DEBUG
+    handlers: [console]
+
+root:
+  level: DEBUG
+  handlers: [console]

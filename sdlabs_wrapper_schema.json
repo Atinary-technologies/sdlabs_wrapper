@@ -1,244 +1,250 @@
 {
-  "DescriptorProperty": {
-    "type": "object",
-    "required": [
-      "key",
-      "value"
-    ],
-    "properties": {
-      "key": {
-        "type": "string"
-      },
-      "value": {
-        "type": "number"
-      }
-    },
-    "x-module-name": "sdlabs_wrapper.models",
-    "description": "Single property of category."
-  },
-  "Descriptor": {
-    "type": "object",
-    "required": [
-      "category"
-    ],
-    "properties": {
-      "category": {
-        "type": "string"
-      },
-      "properties": {
-        "type": "array",
-        "items": {
-          "$ref": "#/components/schemas/DescriptorProperty"
-        }
-      }
-    },
-    "x-module-name": "sdlabs_wrapper.models",
-    "description": "Categorical parameter (contains category and its descriptor).\n\n    If properties are provided, they should be present for all\n    categorical options\n    "
-  },
-  "Parameter": {
-    "type": "object",
-    "properties": {
-      "name": {
-        "type": "string"
-      },
-      "type": {
-        "type": "string",
-        "default": "continuous"
-      },
-      "high_value": {
-        "type": "number"
-      },
-      "low_value": {
-        "type": "number"
-      },
-      "stride": {
-        "type": "number"
-      },
-      "description": {
-        "type": "string"
-      },
-      "descriptors": {
-        "type": "array",
-        "items": {
-          "$ref": "#/components/schemas/Descriptor"
-        }
-      }
-    },
-    "x-module-name": "sdlabs_wrapper.models",
-    "description": "Single parameter object (can be discrete, categorical or continuous)"
-  },
-  "MultiObjectiveConfiguration": {
-    "type": "object",
-    "properties": {
-      "hierarchy": {
-        "type": "integer",
-        "default": 0,
-        "description": "Objective importance. The lower the better. Should be larger or equal to 0. Should be unique"
-      },
-      "relative": {
-        "type": "number",
-        "description": "Relative tolerance to sacrifice from current objective (relative to best found). Should be a percentage (from 0 to 100). If this is the last objective, set it to 0."
-      },
-      "absolute": {
-        "type": "number",
-        "description": "Absolute tolerance to sacrifice from current objective. If this is the last objective, set it to 0."
-      },
-      "weight": {
-        "type": "number",
-        "description": "Relative weight associated to this objective. The value is normalized with respect to the other provided weights. The objectives will also be min-max normalized before applying the weights"
-      }
-    },
-    "x-module-name": "sdlabs_wrapper.models",
-    "description": "MultiObjectiveConfiguration. It can be either `chimera` or\n    `weighted_sum`.\n\n    Chimera is a hierarchical approach to optimize the process.\n    The hierarchy value should be a unique positive integer starting at 0, where 0 is the most important.\n    The tolerance specifies how much a user is willing to sacrifice of this objective to improve the subsequent one.\n    It can be specified in absolute or relative terms. If `relative` tolerance is specified, then it should be stated as a percentage value ranging from 0-100\n    Else, if `absolute` is selected, it should be a positive value that matches the range of the objective. Either `absolute` or `relative` should be chosen.\n\n    Weighted sum requires a `weight` value to be provided. The weight and the values will be renormalized with respect to the weights of other objectives (if any)\n    "
-  },
-  "Objective": {
-    "type": "object",
-    "required": [
-      "name"
-    ],
-    "properties": {
-      "name": {
-        "type": "string"
-      },
-      "goal": {
-        "type": "string",
-        "enum": [
-          "min",
-          "max",
-          "target"
-        ],
-        "x-enum-name": "ObjectiveGoal",
-        "x-module-name": "sdlabs_wrapper.models",
-        "default": "max"
-      },
-      "multi_objective_configuration": {
-        "$ref": "#/components/schemas/MultiObjectiveConfiguration"
-      },
-      "_id": {
-        "type": "string"
-      },
-      "target": {
-        "type": "number"
-      }
-    },
-    "x-module-name": "sdlabs_wrapper.models",
-    "description": "Objective(name: str, goal: sdlabs_wrapper.models.ObjectiveGoal = <ObjectiveGoal.max: 'max'>, multi_objective_configuration: sdlabs_wrapper.models.MultiObjectiveConfiguration = None, _id: str = None, target: float = None)"
-  },
-  "OptimizationConfig": {
-    "type": "object",
-    "properties": {
-      "parameters": {
-        "type": "array",
-        "items": {
-          "$ref": "#/components/schemas/Parameter"
-        }
-      },
-      "objectives": {
-        "type": "array",
-        "items": {
-          "$ref": "#/components/schemas/Objective"
-        }
-      },
-      "optimization_name": {
-        "type": "string",
-        "default": "SampleOptimization"
-      },
-      "description": {
-        "type": "string"
-      },
-      "api_key": {
-        "type": "string",
-        "description": "SDLabs API key. If not found, it will be fetched from `SDLABS_API_KEY` environment variable."
-      },
-      "sdlabs_group_id": {
-        "type": "string",
-        "default": "Atinary"
-      },
-      "multi_objective_function": {
-        "type": "string",
-        "enum": [
-          "chimera",
-          "weighted_sum"
-        ],
-        "x-enum-name": "MofOption",
-        "x-module-name": "sdlabs_wrapper.models"
-      },
-      "algorithm": {
-        "type": "string",
-        "enum": [
-          "dragonfly",
-          "falcon",
-          "falcondngo",
-          "falcongpbo",
-          "gpyopt",
-          "grid",
-          "gryffin",
-          "hyperopt",
-          "latinhypercube",
-          "phoenics",
-          "randomsearch",
-          "sobol",
-          "steepestdescent"
-        ],
-        "x-enum-name": "Optimizer",
-        "x-module-name": "sdlabs_wrapper.models",
-        "default": "dragonfly",
-        "description": "Optimization algorithm to be chosen. See more on Atinary documentation"
-      },
-      "batch_size": {
-        "type": "integer",
-        "default": 1,
-        "description": "Number of  recommendations per iteration. Should be larger than 1 and less than 20"
-      },
-      "budget": {
-        "type": "integer",
-        "default": 20,
-        "description": "Total number of iterations to carry out in the optimization"
-      },
-      "random_seed": {
-        "type": "integer",
-        "default": 2022
-      },
-      "always_restart": {
-        "type": "boolean",
-        "default": false,
-        "description": "Whether every time that we launch `initialize_optimization` a new optimization will be restarted. If False then any ongoing optimizations will be resumed"
-      },
-      "inherit_data": {
-        "type": "boolean",
-        "default": false,
-        "description": "Whether the current optimization will reuse previous optimizations with the same name (see more on home.atinary.com)"
-      }
-    },
-    "x-module-name": "sdlabs_wrapper.models",
-    "description": "Full configuration specifications required to start the optimization.\n\n    It lists a set of parameters, and a set of objectives. If More than\n    one objective is provided\n    "
-  },
-  "Recommendation": {
-    "type": "object",
-    "properties": {
-      "iteration": {
-        "type": "integer"
-      },
-      "batch": {
-        "type": "integer"
-      },
-      "param_values": {
+  "components": {
+    "schemas": {
+      "DescriptorProperty": {
         "type": "object",
-        "additionalProperties": {},
-        "description": "Dictionary with keys matching parameter names provided in config object. Values could be numeric or string"
-      },
-      "_param_file_id": {
-        "type": "string"
-      },
-      "measurements": {
-        "type": "object",
-        "additionalProperties": {
-          "type": "number"
+        "required": [
+          "key",
+          "value"
+        ],
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "value": {
+            "type": "number"
+          }
         },
-        "description": "Dictionary with keys matching objective names provided in config. Values should always be numeric"
+        "x-module-name": "sdlabs_wrapper.models",
+        "description": "Single property of category."
+      },
+      "Descriptor": {
+        "type": "object",
+        "required": [
+          "category"
+        ],
+        "properties": {
+          "category": {
+            "type": "string"
+          },
+          "properties": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DescriptorProperty"
+            }
+          }
+        },
+        "x-module-name": "sdlabs_wrapper.models",
+        "description": "Categorical parameter (contains category and its descriptor).\n\n    If properties are provided, they should be present for all\n    categorical options\n    "
+      },
+      "Parameter": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "default": "continuous"
+          },
+          "high_value": {
+            "type": "number"
+          },
+          "low_value": {
+            "type": "number"
+          },
+          "stride": {
+            "type": "number"
+          },
+          "description": {
+            "type": "string"
+          },
+          "descriptors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Descriptor"
+            }
+          }
+        },
+        "x-module-name": "sdlabs_wrapper.models",
+        "description": "Single parameter object (can be discrete, categorical or continuous)"
+      },
+      "MultiObjectiveConfiguration": {
+        "type": "object",
+        "properties": {
+          "hierarchy": {
+            "type": "integer",
+            "default": 0,
+            "description": "Objective importance. The lower the better. Should be larger or equal to 0. Should be unique"
+          },
+          "relative": {
+            "type": "number",
+            "description": "Relative tolerance to sacrifice from current objective (relative to best found). Should be a percentage (from 0 to 100). If this is the last objective, set it to 0."
+          },
+          "absolute": {
+            "type": "number",
+            "description": "Absolute tolerance to sacrifice from current objective. If this is the last objective, set it to 0."
+          },
+          "weight": {
+            "type": "number",
+            "description": "Relative weight associated to this objective. The value is normalized with respect to the other provided weights. The objectives will also be min-max normalized before applying the weights"
+          }
+        },
+        "x-module-name": "sdlabs_wrapper.models",
+        "description": "MultiObjectiveConfiguration. It can be either `chimera` or\n    `weighted_sum`.\n\n    Chimera is a hierarchical approach to optimize the process.\n    The hierarchy value should be a unique positive integer starting at 0, where 0 is the most important.\n    The tolerance specifies how much a user is willing to sacrifice of this objective to improve the subsequent one.\n    It can be specified in absolute or relative terms. If `relative` tolerance is specified, then it should be stated as a percentage value ranging from 0-100\n    Else, if `absolute` is selected, it should be a positive value that matches the range of the objective. Either `absolute` or `relative` should be chosen.\n\n    Weighted sum requires a `weight` value to be provided. The weight and the values will be renormalized with respect to the weights of other objectives (if any)\n    "
+      },
+      "Objective": {
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "goal": {
+            "type": "string",
+            "enum": [
+              "min",
+              "max",
+              "target"
+            ],
+            "x-enum-name": "ObjectiveGoal",
+            "x-module-name": "sdlabs_wrapper.models",
+            "default": "max"
+          },
+          "multi_objective_configuration": {
+            "$ref": "#/components/schemas/MultiObjectiveConfiguration"
+          },
+          "_id": {
+            "type": "string"
+          },
+          "target": {
+            "type": "number"
+          }
+        },
+        "x-module-name": "sdlabs_wrapper.models",
+        "description": "Objective(name: str, goal: sdlabs_wrapper.models.ObjectiveGoal = <ObjectiveGoal.max: 'max'>, multi_objective_configuration: sdlabs_wrapper.models.MultiObjectiveConfiguration = None, _id: str = None, target: float = None)"
+      },
+      "OptimizationConfig": {
+        "type": "object",
+        "required": [
+          "optimization_name",
+          "parameters",
+          "objectives",
+          "algorithm"
+        ],
+        "properties": {
+          "parameters": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Parameter"
+            }
+          },
+          "objectives": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Objective"
+            }
+          },
+          "optimization_name": {
+            "type": "string",
+            "default": "SampleOptimization"
+          },
+          "description": {
+            "type": "string"
+          },
+          "sdlabs_group_id": {
+            "type": "string",
+            "default": "Atinary"
+          },
+          "multi_objective_function": {
+            "type": "string",
+            "enum": [
+              "chimera",
+              "weighted_sum"
+            ],
+            "x-enum-name": "MofOption",
+            "x-module-name": "sdlabs_wrapper.models"
+          },
+          "algorithm": {
+            "type": "string",
+            "enum": [
+              "dragonfly",
+              "falcon",
+              "falcondngo",
+              "falcongpbo",
+              "gpyopt",
+              "grid",
+              "gryffin",
+              "hyperopt",
+              "latinhypercube",
+              "phoenics",
+              "randomsearch",
+              "sobol",
+              "steepestdescent"
+            ],
+            "x-enum-name": "Optimizer",
+            "x-module-name": "sdlabs_wrapper.models",
+            "default": "dragonfly",
+            "description": "Optimization algorithm to be chosen. See more on Atinary documentation"
+          },
+          "batch_size": {
+            "type": "integer",
+            "default": 1,
+            "description": "Number of  recommendations per iteration. Should be larger than 1 and less than 20"
+          },
+          "budget": {
+            "type": "integer",
+            "default": 20,
+            "description": "Total number of iterations to carry out in the optimization"
+          },
+          "random_seed": {
+            "type": "integer",
+            "default": 2022
+          },
+          "always_restart": {
+            "type": "boolean",
+            "default": false,
+            "description": "Whether every time that we launch `initialize_optimization` a new optimization will be restarted. If False then any ongoing optimizations will be resumed"
+          },
+          "inherit_data": {
+            "type": "boolean",
+            "default": false,
+            "description": "Whether the current optimization will reuse previous optimizations with the same name (see more on home.atinary.com)"
+          }
+        },
+        "x-module-name": "sdlabs_wrapper.models",
+        "description": "Full configuration specifications required to start the optimization.\n\n    It lists a set of parameters, and a set of objectives. If More than\n    one objective is provided\n    "
+      },
+      "Recommendation": {
+        "type": "object",
+        "properties": {
+          "iteration": {
+            "type": "integer"
+          },
+          "batch": {
+            "type": "integer"
+          },
+          "param_values": {
+            "type": "object",
+            "additionalProperties": {},
+            "description": "Dictionary with keys matching parameter names provided in config object. Values could be numeric or string"
+          },
+          "_param_file_id": {
+            "type": "string"
+          },
+          "measurements": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "number"
+            },
+            "description": "Dictionary with keys matching objective names provided in config. Values should always be numeric"
+          }
+        },
+        "x-module-name": "sdlabs_wrapper.models",
+        "description": "Recommendation from SDLabs.\n\n    The parameter values are present in the `param_values` attribute.\n    `param_values` is a dictionary with keys matching the parameter\n    names provided in the OptimizationConfig `measurements` is a\n    dictionary with keys matches the objective names provided in the\n    OptimizationConfig\n    "
       }
-    },
-    "x-module-name": "sdlabs_wrapper.models",
-    "description": "Recommendation from SDLabs.\n\n    The parameter values are present in the `param_values` attribute.\n    `param_values` is a dictionary with keys matching the parameter\n    names provided in the OptimizationConfig `measurements` is a\n    dictionary with keys matches the objective names provided in the\n    OptimizationConfig\n    "
+    }
   }
 }

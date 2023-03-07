@@ -6,7 +6,7 @@ This wrapper is used for quick usage of SDLabs for optimization purposes.
 4. Fetch your API key from the Account page on SDLabs platform and export it as an env variable:
    `export SDLABS_API_KEY=<paste it here>`
 ## Quickstart
-Create optimization specs:
+Create optimization specs inside of `config/optimization_config.json` (see [JSON schema #/components/schemas/OptimizationConfig](./sdlabs_wrapper_schema.json#/components/schemas/OptimizationConfig))
 ```
 design_json = {
     "optimization_name": "Example",
@@ -67,5 +67,7 @@ for iteration in range(opt_wrapper.config.budget):
     if suggestions:
         opt_wrapper.send_measurements(suggestions)
 ```
+## Examples
+* [Optimize Battmo simulation](./examples/battmo_optimization/optimize_battmo_simulation.ipynb)
 ### More info
 You can inspect the `atinary_wrapper/models.py` for more information about the data models.

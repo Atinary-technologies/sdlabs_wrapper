@@ -1,0 +1,33 @@
+{
+    "optimization_name": "BattmoSimulation New wrapper",
+    "description": "Optimize cell layer thicknesses",
+    "sdlabs_group_id": "onterface",
+    "parameters": [
+        {
+            "low_value": 30e-6,
+            "high_value": 150e-6,
+            "name": "neg_electrode_thickness"
+        },
+        {
+            "low_value": 30e-6,
+            "high_value": 150e-6,
+            "name": "pos_electrode_thickness"
+        },
+        {
+            "low_value": 8e-6,
+            "high_value": 15e-6,
+            "name": "separator_thickness"
+        }
+    ],
+    "objectives": [
+        {
+            "name": "energy_density",
+            "goal": "maximize"
+        }
+    ],
+    "inherit_data": false,
+    "always_restart": false,
+    "batch_size": 1,
+    "algorithm": "dragonfly",
+    "budget": 20
+}

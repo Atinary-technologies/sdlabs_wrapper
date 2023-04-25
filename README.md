@@ -38,7 +38,7 @@ design_json = {
         },
         {
             "name": "toxicity",
-            "goal": "minimize",
+            "goal": "min",
             "multi_objective_configuration": {
                 "hierarchy": 1,
                 "relative": 10

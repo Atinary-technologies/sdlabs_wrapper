@@ -22,7 +22,7 @@
     "objectives": [
         {
             "name": "energy_density",
-            "goal": "maximize"
+            "goal": "max"
         }
     ],
     "inherit_data": false,

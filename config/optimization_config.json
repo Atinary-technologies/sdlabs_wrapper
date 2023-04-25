@@ -31,7 +31,7 @@
     "objectives": [
         {
             "name": "overpotential",
-            "goal": "minimize"
+            "goal": "min"
         }
     ],
     "inherit_data": false,

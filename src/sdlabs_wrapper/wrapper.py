@@ -31,16 +31,18 @@ class SDLabsWrapper:
         configuration = sct.Configuration(
             host=SDLABS_ENDPOINT_URL,
             api_key={
-                "X-API-KEY": self.config.api_key,
+                "api_key": self.config.api_key,
             },
         )
+        configuration.access_token = None
         self.sdlabs_api_client = sct.ApiClient(configuration)
         nxs_configuration = nxs.Configuration(
             host=NEXUS_ENDPOINT_URL,
             api_key={
-                "X-API-KEY": self.config.api_key,
+                "api_key": self.config.api_key,
             },
         )
+        nxs_configuration.access_token = None
         self.nexus_api_client = nxs.ApiClient(nxs_configuration)
         self.projects_api = nxs.ProjectsApi(self.nexus_api_client)
         self.files_api = nxs.FilesApi(self.nexus_api_client)
@@ -152,7 +154,7 @@ class SDLabsWrapper:
                     objective_obj=sct.ObjectiveObj(
                         name=obj.name,  # should match workstation measurements
                         description=f'{obj.goal.title()} the {obj.name.replace("_"," ")}',
-                        goal=obj.goal,  # can be 'minimize', 'maximize' or 'target'
+                        goal=obj.goal,  # can be 'min', 'max' or 'target'
                         # target=100,
                     )
                 ).object
@@ -385,7 +387,7 @@ class SDLabsWrapper:
         self.files_api.upload_file(
             project_id,
             "properties",
-            upload_file_req=nxs.UploadFileReq(file=str(response_file.resolve())),
+            file=str(response_file.resolve()),
         )
         LOGGER.info(
             f'Properties uploaded {param_file["file_id"]}:{param_file["file_name"]}'

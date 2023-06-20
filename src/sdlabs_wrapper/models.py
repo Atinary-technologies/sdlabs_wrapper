@@ -6,6 +6,7 @@ from enum import Enum
 from math import floor, log10
 from typing import Dict, List
 
+import scientia_sdk as sct
 from dataclasses_jsonschema import JsonSchemaMixin, SchemaType
 
 LOGGER = logging.getLogger(__name__)
@@ -130,6 +131,21 @@ class Parameter(JsonSchemaMixin):
         return {key: val for key, val in res.items() if val is not None}
 
 
+class Constraint(sct.ConstraintObj):
+    def __init__(self, name=None, **kwargs):
+
+        kwargs["name"] = name or kwargs.get("type")
+        # check if there are bounds within the definitions. If so, cast them to strings
+        for defn in kwargs.get("definitions", []):
+            if isinstance(defn, dict) and defn.get("bounds"):
+                defn["bounds"] = [
+                    [str(bound) for bound in bound_list]
+                    for bound_list in defn["bounds"]
+                ]
+
+        super().__init__(**kwargs)
+
+
 @dataclass
 class MultiObjectiveConfiguration(JsonSchemaMixin):
     """MultiObjectiveConfiguration. It can be either `chimera` or
@@ -223,8 +239,8 @@ class OptimizationConfig(JsonSchemaMixin):
         },
     )
     sdlabs_group_id: str = "Atinary"
-
-    multi_objective_function: MofOption = field(default=None)  # or weighted_sum
+    constraints: List[Constraint] = field(default=None)
+    multi_objective_function: MofOption = field(default=None)
     algorithm: Optimizer = field(
         default=Optimizer.dragonfly,
         metadata={
@@ -284,6 +300,8 @@ class OptimizationConfig(JsonSchemaMixin):
             self.parameters = [Parameter(**prm) for prm in self.parameters]
         if self.objectives and isinstance(self.objectives[0], dict):
             self.objectives = [Objective(**obj) for obj in self.objectives]
+        if self.constraints and isinstance(self.constraints[0], dict):
+            self.constraints = [Constraint(**cstr) for cstr in self.constraints]
         if not self.api_key:
             self.api_key = os.environ.get("SDLABS_API_KEY")
 
@@ -318,7 +336,7 @@ class Recommendation(JsonSchemaMixin):
 
 def generate_and_write_schema(file_path="sdlabs_wrapper_schema.json"):
     with open("sdlabs_wrapper_schema.json", "w") as f:
-        schema = JsonSchemaMixin.all_json_schemas(schema_type=SchemaType.OPENAPI_3)
+        schema = JsonSchemaMixin.all_json_schemas(schema_type=SchemaType.SWAGGER_V3)
         json.dump(schema, f, indent=2)
     LOGGER.info(f"Successfully created schema at {file_path}")
 

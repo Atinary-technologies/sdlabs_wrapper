@@ -35,6 +35,7 @@ class SDLabsWrapper:
             },
         )
         configuration.access_token = None
+
         self.sdlabs_api_client = sct.ApiClient(configuration)
         nxs_configuration = nxs.Configuration(
             host=NEXUS_ENDPOINT_URL,
@@ -184,6 +185,32 @@ class SDLabsWrapper:
                         ],
                     )
                 ).object.id
+            # constraints
+            sdlabs_constraints = []
+            if self.config.constraints:
+                # map parameter names to ids of template parameters
+                constraints_api = sct.ConstraintApi(self.sdlabs_api_client)
+                sdlabs_constraints = []
+                for constraint in self.config.constraints:
+                    # replace parameter with id of template parameter
+                    for cstr_defn in constraint.definitions:
+                        if isinstance(cstr_defn, dict):
+                            cstr_defn["parameter"] = next(
+                                prm.id
+                                for prm in tpl_params
+                                if prm.name == cstr_defn["parameter"]
+                            )
+                        else:
+                            cstr_defn.parameter = next(
+                                prm.id
+                                for prm in tpl_params
+                                if prm.name == cstr_defn.parameter
+                            )
+
+                sdlabs_constraints = constraints_api.constraint_create_many(
+                    constraint_obj=self.config.constraints
+                ).objects
+
             self.template = tpl_api.template_create(
                 template_obj=sct.TemplateObj(
                     # budget: total number of objective function measurements allowed
@@ -207,6 +234,7 @@ class SDLabsWrapper:
                             ],
                         )
                     ],
+                    constraints=[cstr.id for cstr in sdlabs_constraints],
                 )
             ).object
         # Check if any campaigns are running. If so, take one of them

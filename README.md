@@ -69,5 +69,64 @@ for iteration in range(opt_wrapper.config.budget):
 ```
 ## Examples
 * [Optimize Battmo simulation](./examples/battmo_optimization/optimize_battmo_simulation.ipynb)
+## Constraints (Only supported with premium algorithms)
+You can see the format of constraints inside of `atinary_wrapper/models.py::Constraint`.
+### Linear Equality Constraints
+Here is an example of a LinearEquality constraint where we want the sum of Manganese, Iron, Chromium and Aluminum to add up to 1.0.
+``` json
+"constraints": [
+        {
+            "type": "linear_eq",
+            "definitions": [
+                {
+                    "parameter": "Manganese",
+                    "weight": 1
+                },
+                {
+                    "parameter": "Iron",
+                    "weight": 1
+                },
+                {
+                    "parameter": "Chromium",
+                    "weight": 1
+                },
+                {
+                    "parameter": "Aluminum",
+                    "weight": 1
+                }
+            ],
+            "targets": [
+                1
+            ]
+        }
+]
+```
+### Exclusion constraint
+This one only excludes a specific range of a single parameter (Manganese cannot be between 0 and 1).
+``` json
+"constraints": [
+
+        {
+            "type":"exclusion",
+            "definitions":[
+                {"parameter":"Manganese","bounds":[[0,1]]}
+            ]
+        }
+    ]
+```
+### Conditional Exclusion constraint
+This one only excludes a conditional range of 2 or more parameters (Manganese cannot have a value between 0 and 1 if Iron is between 0 and 2 and viceversa)
+``` json
+"constraints": [
+
+        {
+            "type":"conditional_exclusion",
+            "definitions":[
+                {"parameter":"Manganese","bounds":[[0,1]]},
+                {"parameter":"Iron","bounds":[[0,2]]}
+            ]
+        }
+    ]
+```
 ### More info
 You can inspect the `atinary_wrapper/models.py` for more information about the data models.

@@ -53,6 +53,7 @@ class SDLabsWrapper:
         prm_api = sct.ParameterApi(self.sdlabs_api_client)
         tpl_api = sct.TemplateApi(self.sdlabs_api_client)
         cpg_api = sct.CampaignApi(self.sdlabs_api_client)
+        opt_api = sct.OptimizerApi(self.sdlabs_api_client)
         # List workstations
         wsts = wst_api.workstations_list(
             is_public=False, group_id=self.config.sdlabs_group_id
@@ -118,11 +119,73 @@ class SDLabsWrapper:
             ),
             None,
         )
+
         if template_id:
+            # fetch template and update budget, batch-size and random seed
+            # to do so, we need to pass full object
             self.template = tpl_api.template_get(template_id=template_id).object
+            if self.config.budget != self.template.budget:
+                # update budget of template
+                self.template.budget = self.config.budget
+                tpl_dict = {
+                    key: value
+                    for key, value in self.template.to_dict().items()
+                    if key in sct.TemplateObj.attribute_map.keys()
+                }
+                # replace constraints, objective, optimizer, multi-objective function
+                # with ids
+                for key in [
+                    "constraints",
+                    "parameters",
+                    "objective",
+                    "optimizer",
+                    "multi_objective_function",
+                ]:
+                    # replace with id (required to update template)
+                    if key == "parameters":
+                        tpl_dict["parameters"] = [
+                            sct.StepObj(
+                                level=level_obj.level,
+                                parameters=[
+                                    sct.ParameterCpgObj(
+                                        parameter_id=step_prm._parameter.id,  # Copy of the workstation's parameter / parameters names should match!
+                                        workstation_id=step_prm._workstation.id,
+                                    )
+                                    for step_prm in level_obj.parameters
+                                ],
+                            )
+                            for level_obj in self.template.parameters
+                        ]
+                    elif key == "constraints" and self.template.constraints:
+                        tpl_dict[key] = [cstr.id for cstr in self.template.constraints]
+                    elif key == "objective":
+                        tpl_dict["objective"] = self.template.objectives[0].id
+                    else:
+                        tpl_dict[key] = getattr(
+                            getattr(self.template, key, {}), "id", None
+                        )
+                tpl_obj = sct.TemplateObj(**tpl_dict)
+                tpl_api.template_update(template_id=template_id, template_obj=tpl_obj)
+                LOGGER.debug("Updated template budget")
+            # update batch-size and random seed (need optimizer)
+            opt_object = sct.OptObj(
+                **{
+                    key: value
+                    for key, value in self.template.optimizer.to_dict().items()
+                    if key in sct.OptObj.attribute_map.keys()
+                }
+            )
+            for conf in opt_object.configuration:
+                # loop over configuration (list of dictionaries with the following format
+                # [{"key":<key>, "value":<value>}]). Find key matching batch_size and random_seed
+                # and update value
+                if conf["key"] in ("batch_size", "random_seed"):
+                    conf["value"] = str(getattr(self.config, conf["key"]))
+            opt_api.optimizer_update(self.template.optimizer.id, opt_obj=opt_object)
+            LOGGER.debug("Updated template batch size and random seed")
         else:
             # Create template
-            opt_api = sct.OptimizerApi(self.sdlabs_api_client)
+
             obj_api = sct.ObjectiveApi(self.sdlabs_api_client)
             mof_api = sct.MultiObjectiveFunctionApi(self.sdlabs_api_client)
             # create parameters

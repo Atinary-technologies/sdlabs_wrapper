@@ -69,7 +69,7 @@ for iteration in range(opt_wrapper.config.budget):
 ```
 ## Examples
 * [Optimize Battmo simulation](./examples/battmo_optimization/optimize_battmo_simulation.ipynb)
-## Constraints (Only supported with premium algorithms)
+## Constraints (Only supported with enterprise account and premium algorithms)
 You can see the format of constraints inside of `atinary_wrapper/models.py::Constraint`.
 ### Linear Equality Constraints
 Here is an example of a LinearEquality constraint where we want the sum of Manganese, Iron, Chromium and Aluminum to add up to 1.0.

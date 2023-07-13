@@ -12,6 +12,11 @@ from dataclasses_jsonschema import JsonSchemaMixin, SchemaType
 LOGGER = logging.getLogger(__name__)
 
 
+class AccountType(Enum):
+    enterprise = "enterprise"
+    academic = "academic"
+
+
 class Optimizer(Enum):
     dragonfly = "dragonfly"
     falcon = "falcon"
@@ -239,6 +244,14 @@ class OptimizationConfig(JsonSchemaMixin):
         },
     )
     sdlabs_group_id: str = "Atinary"
+    sdlabs_account_type: AccountType = field(
+        default=AccountType.academic,
+        metadata={
+            "description": """Account type will determine the endpoint of the API calls.
+                                                                                    If Academic, certain functionalities will not be supported.
+                                                                                    For more information please refer to the terms and service of SDLabs"""
+        },
+    )
     constraints: List[Constraint] = field(default=None)
     multi_objective_function: MofOption = field(default=None)
     algorithm: Optimizer = field(
@@ -284,6 +297,12 @@ class OptimizationConfig(JsonSchemaMixin):
         },
     )
 
+    @property
+    def sdlabs_endpoint_url(self):
+        if self.sdlabs_account_type == AccountType.enterprise:
+            return "https://enterprise.atinary.com/sdlabs/api/latest"
+        return "https://scientia.atinary.com/sdlabs/api/latest"
+
     def __post_init__(
         self, spec_file_path: str = None, input_content: Dict[str, any] = None
     ):
@@ -304,6 +323,8 @@ class OptimizationConfig(JsonSchemaMixin):
             self.constraints = [Constraint(**cstr) for cstr in self.constraints]
         if not self.api_key:
             self.api_key = os.environ.get("SDLABS_API_KEY")
+        if isinstance(self.sdlabs_account_type, str):
+            self.sdlabs_account_type = AccountType[self.sdlabs_account_type]
 
 
 @dataclass

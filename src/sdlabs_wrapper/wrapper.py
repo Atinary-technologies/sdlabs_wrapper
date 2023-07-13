@@ -13,7 +13,6 @@ import sdlabs_wrapper.config as config
 import sdlabs_wrapper.models as models
 
 LOGGER = logging.getLogger(__name__)
-SDLABS_ENDPOINT_URL = "https://enterprise.atinary.com/sdlabs/api/latest"
 NEXUS_ENDPOINT_URL = "https://scientia.atinary.com/nexus/api/latest/"
 
 
@@ -29,7 +28,7 @@ class SDLabsWrapper:
     def __post_init__(self):
         self.config = self.config or config.init()
         configuration = sct.Configuration(
-            host=SDLABS_ENDPOINT_URL,
+            host=self.config.sdlabs_endpoint_url,
             api_key={
                 "api_key": self.config.api_key,
             },
@@ -521,9 +520,7 @@ if __name__ == "__main__":
     with open(file_path, "rb") as f:
         config_dict = json.load(f)
     wrapper = initialize_optimization(
-        inherit_data=True,
         always_restart=True,
-        # spec_file_path=file_path,
         spec_file_content=config_dict,
     )
     for iteration in range(wrapper.config.budget):

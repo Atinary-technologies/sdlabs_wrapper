@@ -1,6 +1,7 @@
 {
-    "optimization_name": "Optimization Demo",
+    "optimization_name": "Electrolyte demo",
     "description": "Optimize electrolyte mixture to minimize overpotential",
+    "sdlabs_account_type": "academic",
     "sdlabs_group_id": "Atinary",
     "parameters": [
         {
@@ -28,6 +29,7 @@
             "type": "continuous"
         }
     ],
+    "multi_objective_function": "chimera",
     "objectives": [
         {
             "name": "overpotential",
@@ -37,6 +39,6 @@
     "inherit_data": false,
     "always_restart": false,
     "batch_size": 1,
-    "algorithm": "dragonfly",
-    "budget": 1
+    "algorithm": "gpyopt",
+    "budget": 10
 }

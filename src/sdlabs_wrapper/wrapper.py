@@ -71,10 +71,10 @@ class SDLabsWrapper:
             wst_description = self.config.description
             wst_bandwidth = 99  # How many recommendations can be handled in parallel?
             # specify Nexus connection
-            wst_connection = sct.ConnectConfigObj(
+            wst_connection = sct.ConnectConfigNexusObj(
                 format="yml",
                 type=sct.ConnectionType.NEXUS,
-                nexus_project_name=self.config.optimization_name,
+                nexus_project_name=wst_name,
                 # this points to a workstation-specific repository where files will be handled
                 user_api_key=self.config.api_key,
             )
@@ -101,6 +101,7 @@ class SDLabsWrapper:
                 workstation_obj=sct.WorkstationObj(
                     name=wst_name,
                     description=wst_description,
+                    conn_type=sct.ConnectionType.NEXUS,
                     connection=wst_connection,
                     bandwidth=wst_bandwidth,
                     measurements=wst_measurements,
@@ -126,11 +127,7 @@ class SDLabsWrapper:
             if self.config.budget != self.template.budget:
                 # update budget of template
                 self.template.budget = self.config.budget
-                tpl_dict = {
-                    key: value
-                    for key, value in self.template.to_dict().items()
-                    if key in sct.TemplateObj.attribute_map.keys()
-                }
+                tpl_dict = self.template.to_dict()
                 # replace constraints, objective, optimizer, multi-objective function
                 # with ids
                 for key in [
@@ -167,19 +164,13 @@ class SDLabsWrapper:
                 tpl_api.template_update(template_id=template_id, template_obj=tpl_obj)
                 LOGGER.debug("Updated template budget")
             # update batch-size and random seed (need optimizer)
-            opt_object = sct.OptObj(
-                **{
-                    key: value
-                    for key, value in self.template.optimizer.to_dict().items()
-                    if key in sct.OptObj.attribute_map.keys()
-                }
-            )
+            opt_object = sct.OptObj(**self.template.optimizer.to_dict())
             for conf in opt_object.configuration:
                 # loop over configuration (list of dictionaries with the following format
                 # [{"key":<key>, "value":<value>}]). Find key matching batch_size and random_seed
                 # and update value
-                if conf["key"] in ("batch_size", "random_seed"):
-                    conf["value"] = str(getattr(self.config, conf["key"]))
+                if conf.key in ("batch_size", "random_seed"):
+                    conf.value = str(getattr(self.config, conf.key))
             opt_api.optimizer_update(self.template.optimizer.id, opt_obj=opt_object)
             LOGGER.debug("Updated template batch size and random seed")
         else:

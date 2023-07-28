@@ -144,8 +144,8 @@ class SDLabsWrapper:
                                 level=level_obj.level,
                                 parameters=[
                                     sct.ParameterCpgObj(
-                                        parameter_id=step_prm._parameter.id,  # Copy of the workstation's parameter / parameters names should match!
-                                        workstation_id=step_prm._workstation.id,
+                                        parameter_id=step_prm.parameter.id,  # Copy of the workstation's parameter / parameters names should match!
+                                        workstation_id=step_prm.workstation.id,
                                     )
                                     for step_prm in level_obj.parameters
                                 ],

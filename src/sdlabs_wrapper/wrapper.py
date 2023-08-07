@@ -232,7 +232,8 @@ class SDLabsWrapper:
                         name=self.config.multi_objective_function,
                         configuration=[
                             sct.MofObjConfig(
-                                obj._id, **obj.multi_objective_configuration.to_dict()
+                                objective_id=obj._id,
+                                **obj.multi_objective_configuration.to_dict(),
                             )
                             for obj in self.config.objectives
                         ],

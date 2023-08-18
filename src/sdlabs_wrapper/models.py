@@ -196,8 +196,7 @@ class MultiObjectiveConfiguration(JsonSchemaMixin):
     )  # weight used for weighted_sum
 
     def __post_init__(self):
-        if bool(self.relative) == bool(self.absolute):
-            raise ValueError("Need to provide either absolute or relative tolerance")
+        pass
 
     def to_dict(self):
         return asdict(self)

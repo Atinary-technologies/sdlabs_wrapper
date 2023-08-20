@@ -6,7 +6,6 @@ from enum import Enum
 from math import floor, log10
 from typing import Dict, List
 
-import scientia_sdk as sct
 from dataclasses_jsonschema import JsonSchemaMixin, SchemaType
 
 LOGGER = logging.getLogger(__name__)
@@ -136,19 +135,57 @@ class Parameter(JsonSchemaMixin):
         return {key: val for key, val in res.items() if val is not None}
 
 
-class Constraint(sct.ConstraintObj):
-    def __init__(self, name=None, **kwargs):
+@dataclass
+class ConstraintDefinition(JsonSchemaMixin):
+    parameter: str = field(metadata={"description": "Name of the parameter"})
+    bounds: List[List[any]] = field(
+        default=None,
+        metadata={
+            "description": "Bounds of the parameter as a list of lists. Each list should have up to 2 elements"
+        },
+    )
+    weight: float = field(
+        default=None,
+        metadata={"description": "Weight of the parameter in the constraint"},
+    )
 
-        kwargs["name"] = name or kwargs.get("type")
-        # check if there are bounds within the definitions. If so, cast them to strings
-        for defn in kwargs.get("definitions", []):
-            if isinstance(defn, dict) and defn.get("bounds"):
-                defn["bounds"] = [
-                    [str(bound) for bound in bound_list]
-                    for bound_list in defn["bounds"]
-                ]
+    def __post_init__(self):
+        # cast all bounds to strings
+        if self.bounds:
+            self.bounds = [
+                [str(bound) for bound in bound_list] for bound_list in self.bounds
+            ]
 
-        super().__init__(**kwargs)
+
+@dataclass
+class Constraint(JsonSchemaMixin):
+    definitions: List[ConstraintDefinition] = None
+    targets: List[float] = field(
+        default=None, metadata={"description": "Target values for the constraints"}
+    )
+    name: str = field(default=None, metadata={"description": "Name of the constraint"})
+    type: str = field(
+        default="linear_eq",
+        metadata={
+            "validator": lambda x: x
+            in [
+                "exclusion",
+                "conditional_exclusion",
+                "linear_eq",
+                "linear_lte",
+                "linear_gte",
+                "linear_between",
+            ]
+        },
+    )
+
+    def __post_init__(self):
+        if self.definitions and isinstance(self.definitions[0], dict):
+            self.definitions = [
+                ConstraintDefinition(**cstr) for cstr in self.definitions
+            ]
+        if not self.name:
+            self.name = self.type
 
 
 @dataclass

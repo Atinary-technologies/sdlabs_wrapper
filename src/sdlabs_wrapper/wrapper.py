@@ -262,7 +262,10 @@ class SDLabsWrapper:
                             )
 
                 sdlabs_constraints = constraints_api.constraint_create_many(
-                    constraint_obj=self.config.constraints
+                    constraint_obj=[
+                        sct.ConstraintObj(**cstr.to_dict())
+                        for cstr in self.config.constraints
+                    ]
                 ).objects
 
             self.template = tpl_api.template_create(
@@ -331,7 +334,7 @@ class SDLabsWrapper:
         )
 
     def get_new_suggestions(
-        self, max_retries=2, sleep_time_s=15
+        self, max_retries=5, sleep_time_s=30
     ) -> List[models.Recommendation]:
         """Get new parameters.
 
@@ -450,7 +453,9 @@ class SDLabsWrapper:
         data = {
             **param_file,
             "processes": measurements.param_values,
-            "properties": measurements.measurements,
+            "properties": {
+                key: float(val) for key, val in measurements.measurements.items()
+            },
         }
         response_file = pathlib.Path(
             f'{tempfile.gettempdir()}/{param_file["file_name"]}'
@@ -516,7 +521,7 @@ if __name__ == "__main__":
         spec_file_content=config_dict,
     )
     for iteration in range(wrapper.config.budget):
-        suggestions = wrapper.get_new_suggestions(max_retries=4, sleep_time_s=15)
+        suggestions = wrapper.get_new_suggestions(max_retries=6, sleep_time_s=30)
         LOGGER.info(f"Iteration {iteration+1} New Suggestions: {suggestions}")
         for suggestion in suggestions:
             suggestion.measurements = {}

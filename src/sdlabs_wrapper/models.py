@@ -98,7 +98,7 @@ class Parameter(JsonSchemaMixin):
         if self.type == "categorical":
             return None
         exp_val = self.find_exp(self.low_value or self.stride or self.high_value)
-        return abs(exp_val) if exp_val < 0 else None
+        return abs(exp_val) if exp_val < -4 else None
 
     def rescale_units_to_sdlabs(self, val):
         """Rescale to SDLabs format (transform really small values using their

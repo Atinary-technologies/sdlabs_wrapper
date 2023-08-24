@@ -135,7 +135,7 @@ class SDLabsWrapper:
                     "parameters",
                     "objective",
                     "optimizer",
-                    "multi_objective_function",
+                    # "multi_objective_function",
                 ]:
                     # replace with id (required to update template)
                     if key == "parameters":

@@ -130,3 +130,6 @@ This one only excludes a conditional range of 2 or more parameters (Manganese ca
 ```
 ### More info
 You can inspect the `atinary_wrapper/models.py` for more information about the data models.
+
+## Funding
+This project has received funding from the European Union’s Horizon 2020 research and innovation programme under grant agreement No 957189. The project is part of BATTERY 2030+, the large-scale European research initiative for inventing the sustainable batteries of the future.

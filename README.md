@@ -30,7 +30,7 @@ design_json = {
     "objectives": [
         {
             "name": "conductivity",
-            "goal": "maximize",
+            "goal": "max",
             "multi_objective_configuration": {
                 "hierarchy": 0,
                 "relative": 10

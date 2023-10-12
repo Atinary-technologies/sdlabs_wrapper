@@ -6,6 +6,11 @@ This wrapper is used for quick usage of SDLabs for optimization purposes.
 4. Fetch your API key from the Account page on SDLabs platform and export it as an env variable:
    `export SDLABS_API_KEY=<paste it here>`
 ## Quickstart
+<!-- open in colab link-->
+<a href="https://colab.research.google.com/drive/1BL6CxQgIuosys-7ROztNifXNk4M50mvR?usp=sharing" target="_blank">
+  <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/>
+</a>
+
 Create optimization specs inside of `config/optimization_config.json` (see [JSON schema #/components/schemas/OptimizationConfig](./sdlabs_wrapper_schema.json#/components/schemas/OptimizationConfig))
 ```
 design_json = {

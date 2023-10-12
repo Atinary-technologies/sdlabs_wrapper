@@ -53,19 +53,26 @@ design_json = {
 ```
 Initialize optimization (with api key). Either pass it as an argument or export it as an env variable  `SDLABS_API_KEY`
 ```
+import json
 import random
-from sdlabs_wrapper.wrapper import initialize_optimization
-opt_wrapper = initialize_optimization(spec_file_content=design_json)
-for iteration in range(opt_wrapper.config.budget):
-    suggestions = opt_wrapper.get_new_suggestions(max_retries=4, sleep_time_s=15)
+
+file_path = "config/optimization_config.json"
+# load config as dict
+with open(file_path, "rb") as f:
+    config_dict = json.load(f)
+wrapper = initialize_optimization(
+    spec_file_content=config_dict,
+)
+for iteration in range(wrapper.config.budget):
+    LOGGER.info(f"Iteration {iteration+1}: Fetching new suggestions")
+    suggestions = wrapper.get_new_suggestions(max_retries=6, sleep_time_s=30)
     LOGGER.info(f"Iteration {iteration+1} New Suggestions: {suggestions}")
     for suggestion in suggestions:
-        suggestion.measurements = {
-            "toxicity": random.random(),
-            "conductivity": random.random(),
-        }
+        for obj in wrapper.config.objectives:
+            suggestion.measurements[obj.name] = random.random()
     if suggestions:
-        opt_wrapper.send_measurements(suggestions)
+        wrapper.send_measurements(suggestions)
+        LOGGER.info(f"Iteration {iteration+1} Measurements sent")
 ```
 ## Examples
 * [Optimize Battmo simulation](./examples/battmo_optimization/optimize_battmo_simulation.ipynb)

@@ -6,6 +6,7 @@ from enum import Enum
 from math import floor, log10
 from typing import Dict, List
 
+import scientia_sdk as sct
 from dataclasses_jsonschema import JsonSchemaMixin, SchemaType
 
 LOGGER = logging.getLogger(__name__)
@@ -103,6 +104,8 @@ class Parameter(JsonSchemaMixin):
     def rescale_units_to_sdlabs(self, val):
         """Rescale to SDLabs format (transform really small values using their
         base_10_exponent)"""
+        if self.type == "categorical":
+            return val
         if not self._base_10_exponent:
             return val
         return round(val * 10**self._base_10_exponent, 2)
@@ -110,6 +113,9 @@ class Parameter(JsonSchemaMixin):
     def rescale_units_to_user(self, val):
         """Rescale with respect to exponent (convert from microns to m for
         example)"""
+        if self.type == "categorical":
+            return val
+        val = float(val)
         if not self._base_10_exponent:
             return val
         val /= 10**self._base_10_exponent
@@ -374,21 +380,60 @@ class Recommendation(JsonSchemaMixin):
     OptimizationConfig
     """
 
-    iteration: int = None
-    batch: int = None
+    _obs_obj: sct.LatestObservationsObj = None
+    _parameter_map: Dict[str, Parameter] = field(
+        default_factory=dict,
+        metadata={
+            "description": "Dictionary with key name and value Parameter. Only required if _obs_obj is not None"
+        },
+    )
     param_values: Dict[str, any] = field(
-        default=None,
+        default_factory=dict,
         metadata={
-            "description": "Dictionary with keys matching parameter names provided in config object. Values could be numeric or string"
+            "description": "Dictionary with key name and value float or string (if categorical)"
         },
     )
-    _param_file_id: str = None
     measurements: Dict[str, float] = field(
-        default=None,
-        metadata={
-            "description": "Dictionary with keys matching objective names provided in config. Values should always be numeric"
-        },
+        default_factory=dict,
+        metadata={"description": "Dictionary with key name and value float"},
     )
+
+    def __post_init__(self):
+        if self._obs_obj:
+            self.param_values = {}
+            for prm_val_obj in self._obs_obj.parameters:
+                param = self._parameter_map.get(prm_val_obj.name)
+                if param.type == "categorical":
+                    self.param_values[prm_val_obj.name] = str(prm_val_obj.value)
+                else:
+                    self.param_values[prm_val_obj.name] = param.rescale_units_to_user(
+                        float(prm_val_obj.value)
+                    )
+            self.measurements = {
+                msr_val_obj.name: float(msr_val_obj.value)
+                if msr_val_obj.value
+                else None
+                for msr_val_obj in self._obs_obj.measurements
+            }
+
+    @property
+    def latest_observation_obj(self) -> sct.LatestObservationsObj:
+        for prm_val_obj in self._obs_obj.parameters:
+            param = self._parameter_map.get(prm_val_obj.name)
+            prm_val_obj.value = str(
+                param.rescale_units_to_sdlabs(self.param_values[prm_val_obj.name])
+            )
+        for msr_val_obj in self._obs_obj.measurements:
+            msr_val_obj.value = str(self.measurements[msr_val_obj.name])
+        return self._obs_obj
+
+    @property
+    def iteration(self):
+        return self._obs_obj.iteration
+
+    @property
+    def batch(self):
+        return self._obs_obj.batch_number
 
 
 def generate_and_write_schema(file_path="sdlabs_wrapper_schema.json"):

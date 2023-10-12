@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "sdlabs_wrapper"
-version = "0.7.1"
+version = "0.8.0"
 description = "My package description"
 readme = "README.md"
 requires-python = ">=3.7"
@@ -15,8 +15,7 @@ keywords = ["ML", "SDLabs", "Battery electrolytes"]
 # ]
 dependencies = [
     "pyyaml",
-    "scientia_sdk>=1.2.0",
-    "nexus_sdk@git+https://github.com/Atinary-technologies/nexus_sdk@v1.1.1",
+    "scientia_sdk>=1.2.7",
     "pre-commit",
     "dataclasses-jsonschema",
 ]

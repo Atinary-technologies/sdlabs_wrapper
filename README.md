@@ -50,7 +50,7 @@ design_json = {
             }
         }
     ],
-    "batch_size": 3,
+    "batch_size": 1,
     "algorithm": "dragonfly",
     "budget": 20
 }

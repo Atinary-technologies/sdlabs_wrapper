@@ -342,8 +342,8 @@ class OptimizationConfig(JsonSchemaMixin):
     @property
     def sdlabs_endpoint_url(self):
         if self.sdlabs_account_type == AccountType.enterprise:
-            return "https://enterprise.atinary.com/sdlabs/api/latest"
-        return "https://scientia.atinary.com/sdlabs/api/latest"
+            return "https://api.enterprise.atinary.com/sdlabs/latest"
+        return "https://api.scientia.atinary.com/sdlabs/latest"
 
     def __post_init__(
         self, spec_file_path: str = None, input_content: Dict[str, any] = None

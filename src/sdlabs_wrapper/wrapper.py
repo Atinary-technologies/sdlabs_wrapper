@@ -43,7 +43,9 @@ class SDLabsWrapper:
 
         # List workstations
         wsts = self.wst_api.workstations_list(
-            is_public=False, group_id=self.config.sdlabs_group_id
+            is_public=False,
+            group_id=self.config.sdlabs_group_id,
+            names=[self.config.optimization_name],
         ).objects
         workstation = next(
             (wst for wst in wsts if wst.name == self.config.optimization_name), None

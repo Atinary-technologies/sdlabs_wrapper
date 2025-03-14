@@ -17,20 +17,19 @@ class AccountType(Enum):
     academic = "academic"
 
 
+class Environment(Enum):
+    com = "com"
+    network = "network"
+    dev = "dev"
+
+
 class Optimizer(Enum):
-    dragonfly = "dragonfly"
-    falcon = "falcon"
     falcondngo = "falcondngo"
     falcongpbo = "falcongpbo"
-    gpyopt = "gpyopt"
+    edboplus = "edboplus"
     grid = "grid"
-    gryffin = "gryffin"
-    hyperopt = "hyperopt"
-    latinhypercube = "latinhypercube"
-    phoenics = "phoenics"
     randomsearch = "randomsearch"
-    sobol = "sobol"
-    steepestdescent = "steepestdescent"
+    semopt = "semopt"
 
 
 class ObjectiveGoal(Enum):
@@ -294,6 +293,12 @@ class OptimizationConfig(JsonSchemaMixin):
                                                                                     For more information please refer to the terms and service of SDLabs"""
         },
     )
+    sdlabs_environment: Environment = field(
+        default=Environment.com,
+        metadata={
+            "description": """Environment will determine the endpoint of the API calls."""
+        },
+    )
     constraints: List[Constraint] = field(default=None)
     multi_objective_function: MofOption = field(default=None)
     algorithm: Optimizer = field(
@@ -340,10 +345,14 @@ class OptimizationConfig(JsonSchemaMixin):
     )
 
     @property
-    def sdlabs_endpoint_url(self):
+    def _account_type_url_str(self):
         if self.sdlabs_account_type == AccountType.enterprise:
-            return "https://api.enterprise.atinary.com/sdlabs/latest"
-        return "https://api.scientia.atinary.com/sdlabs/latest"
+            return "enterprise"
+        return "scientia"
+
+    @property
+    def sdlabs_endpoint_url(self):
+        return f"https://api.{self._account_type_url_str}.atinary.{self.sdlabs_environment.name}/sdlabs/latest"
 
     def __post_init__(
         self, spec_file_path: str = None, input_content: Dict[str, any] = None
@@ -367,6 +376,8 @@ class OptimizationConfig(JsonSchemaMixin):
             self.api_key = os.environ.get("SDLABS_API_KEY")
         if isinstance(self.sdlabs_account_type, str):
             self.sdlabs_account_type = AccountType[self.sdlabs_account_type]
+        if isinstance(self.sdlabs_environment, str):
+            self.sdlabs_environment = Environment[self.sdlabs_environment]
 
 
 @dataclass

@@ -51,7 +51,7 @@ design_json = {
         }
     ],
     "batch_size": 1,
-    "algorithm": "dragonfly",
+    "algorithm": "edboplus",
     "budget": 20
 }
 

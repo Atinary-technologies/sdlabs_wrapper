@@ -302,7 +302,7 @@ class OptimizationConfig(JsonSchemaMixin):
     constraints: List[Constraint] = field(default=None)
     multi_objective_function: MofOption = field(default=None)
     algorithm: Optimizer = field(
-        default=Optimizer.dragonfly,
+        default=Optimizer.edboplus,
         metadata={
             "description": "Optimization algorithm to be chosen. See more on Atinary documentation",
         },

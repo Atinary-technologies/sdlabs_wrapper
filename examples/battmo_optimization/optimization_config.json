@@ -28,6 +28,6 @@
     "inherit_data": false,
     "always_restart": false,
     "batch_size": 1,
-    "algorithm": "dragonfly",
+    "algorithm": "edboplus",
     "budget": 20
 }

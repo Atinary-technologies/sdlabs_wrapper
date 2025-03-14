@@ -39,6 +39,6 @@
     "inherit_data": false,
     "always_restart": false,
     "batch_size": 1,
-    "algorithm": "gpyopt",
+    "algorithm": "edboplus",
     "budget": 10
 }
